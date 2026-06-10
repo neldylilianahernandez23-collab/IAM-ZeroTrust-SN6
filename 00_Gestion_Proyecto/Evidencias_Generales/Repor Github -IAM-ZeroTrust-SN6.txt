@@ -1,0 +1,72 @@
+IAM-ZeroTrust-SN6
+│
+├── 00_Gestion_Proyecto
+│   ├── Cronogramas
+│   ├── Actas_Reunion
+│   ├── Bitacoras
+│   ├── Entregables
+│   │   ├── Fase0
+│   │   ├── Fase1
+│   │   ├── Fase2
+│   │   ├── Fase3
+│   │   └── Fase4
+│   └── Evidencias_Generales
+│
+│   Responsable:
+│   Neldy Liliana Hernandez Huezo
+│   (Líder de Proyecto Jr.)
+│
+├── 01_IAM
+│   ├── Investigacion
+│   ├── Roles_Grupos
+│   ├── Politicas_Acceso
+│   ├── MFA
+│   ├── Auditoria
+│   └── Evidencias
+│
+│   Responsable:
+│   Luis Fernando Sánchez Barrera
+│   (Ingeniero IAM Jr.)
+│
+├── 02_Backend_Cloud
+│   ├── Investigacion
+│   ├── Arquitectura
+│   ├── API
+│   ├── Base_Datos
+│   ├── Integraciones
+│   └── Evidencias
+│
+│   Responsable:
+│   Danny Medardo Moreno Martínez
+│   (Ingeniero Cloud / Backend Jr.)
+│
+├── 03_Frontend_Dashboard
+│   ├── Investigacion
+│   ├── Wireframes
+│   ├── Mockups
+│   ├── Dashboard
+│   ├── Interfaces
+│   └── Evidencias
+│
+│   Responsable:
+│   Iván Alexander Palacios Hernández
+│   (Frontend / Dashboard Jr.)
+│
+├── 04_QA_Seguridad_Documentacion
+│   ├── Matriz_Pruebas
+│   ├── Riesgos
+│   ├── Casos_Prueba
+│   ├── Documentacion
+│   ├── Validaciones
+│   └── Evidencias
+│
+│   Responsable:
+│   Lissete América Zapata de Zapata
+│   (QA / Analista de Seguridad / Documentación Jr.)
+│
+└── 99_Compartido
+    ├── Diagramas
+    ├── Recursos
+    ├── Plantillas
+    ├── Presentaciones
+    └── Referencias
