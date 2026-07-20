@@ -1,0 +1,47 @@
+# Logs y registros de error
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencias (NUNCA deben subirse a Git)
+node_modules/
+.pnpm-store/
+
+# Archivos de compilación / producción
+dist/
+dist-ssr/
+*.local
+
+# Variables de entorno (Contienen credenciales/claves privadas)
+.env.local
+.env.*.local
+#.env (Descomenta si tampoco quieres subir tu .env base)
+
+# Caché de herramientas de compilación (Vite, ESLint, etc.)
+.cache/
+.vite/
+.eslintcache/
+
+# Archivos del sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Configuración e historial de editores de código (IDE)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
