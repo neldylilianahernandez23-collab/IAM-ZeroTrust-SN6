@@ -8,10 +8,15 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
-    "type-check": "vue-tsc --build"
+    "type-check": "vue-tsc --build",
+    "start": "node server.js"
   },
   "dependencies": {
     "@auth0/auth0-vue": "^2.8.0",
+    "auth0": "^6.1.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
     "pinia": "^4.0.2",
     "vue": "^3.5.38"
   },
