@@ -1,5 +1,5 @@
 <template>
-  <main class="welcome-container">
+  <div class="min-h-screen">
     <!-- 1. Carga de estado -->
     <div v-if="isLoading" class="loading-state">
       <div class="spinner"></div>
@@ -7,45 +7,60 @@
     </div>
 
     <!-- 2. Usuario NO autenticado (Landing) -->
-    <div v-else-if="!isAuthenticated" class="welcome-card">
-      <div class="logo-container">
-        <img 
-          src="https://i.imgur.com/6Hu6uxt.png" 
-          alt="Logo Universidad Nova Digital" 
-          class="logo"
-        />
+    <main v-else-if="!isAuthenticated" class="welcome-container">
+      <div class="welcome-card">
+        <div class="logo-container">
+          <img 
+            src="https://i.imgur.com/6Hu6uxt.png" 
+            alt="Logo Universidad Nova Digital" 
+            class="logo"
+          />
+        </div>
+
+        <h1 class="welcome-title">
+          Bienvenido a Universidad Nova Digital
+        </h1>
+
+        <p class="subtitle">
+          Consola IAM & Control Zero Trust
+        </p>
+
+        <div class="actions">
+          <button class="btn-login" @click="loginWithRedirect()">
+            Iniciar Sesión
+          </button>
+        </div>
       </div>
+    </main>
 
-      <h1 class="welcome-title">
-        Bienvenido a Universidad Nova Digital
-      </h1>
+    <!-- 3. Usuario AUTENTICADO -> Layout Principal con Slot de Navegación -->
+    <MainLayout v-else-if="isAuthenticated" #default="{ currentTab }">
+      <!-- Vista 1: Dashboard -->
+      <DashboardView v-if="currentTab === 'dashboard'" />
 
-      <p class="subtitle">
-        Consola IAM & Control Zero Trust
-      </p>
+     <!-- Vista 2: Usuarios -->
+    <UsersManager v-else-if="currentTab === 'usuarios'" />
 
-      <div class="actions">
-        <button class="btn-login" @click="loginWithRedirect()">
-          Iniciar Sesión
-        </button>
+      <!-- Vista 3: Actividad (Marcador de posición / Futuro componente) -->
+      <div v-else-if="currentTab === 'actividad'" class="p-6 bg-white rounded-lg border border-[#c4c6cf]">
+        <h2 class="text-2xl font-bold text-[#000613] mb-2">Registro de Actividad</h2>
+        <p class="text-xs text-[#43474e]">Historial detallado de logs y auditorías del sistema.</p>
       </div>
-    </div>
-
-    <!-- 3. Usuario AUTENTICADO -> Carga el Dashboard -->
-    <Dashboard v-else-if="isAuthenticated" />
+    </MainLayout>
 
     <!-- 4. Control de errores -->
     <div v-if="error" class="error-state">
       <p>Ocurrió un error: {{ error.message }}</p>
       <button class="btn-login" @click="loginWithRedirect()">Reintentar</button>
     </div>
-  </main>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { useAuth0 } from '@auth0/auth0-vue'
-import Dashboard from './components/Dashboard.vue'
-
+import MainLayout from './components/layout/MainLayout.vue'
+import DashboardView from './components/dashboard/DashboardView.vue'
+import UsersManager from './components/users/UsersManager.vue' // <--- IMPORTAR AQUÍ
 const {
   isLoading,
   isAuthenticated,

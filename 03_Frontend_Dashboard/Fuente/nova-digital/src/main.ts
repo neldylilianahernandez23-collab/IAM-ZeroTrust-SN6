@@ -10,7 +10,10 @@ app.use(
         clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
         authorizationParams: {
             redirect_uri: window.location.origin
-        }
+        },
+        // 🔑 Guardar la sesión localmente para sobrevivir al refresh (F5)
+        cacheLocation: 'localstorage',
+        useRefreshTokens: true
     })
 )
 
