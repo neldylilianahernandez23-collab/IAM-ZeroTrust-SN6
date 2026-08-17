@@ -208,6 +208,25 @@ const AUTH0_ACTION_NAMES = {
   slo: 'Cierre de Sesión Exitoso'
 };
 
+function normalizeRoleList(value) {
+  if (Array.isArray(value)) return value.filter(Boolean).map(String);
+  if (typeof value === 'string') return [value];
+  if (value && typeof value === 'object') {
+    if (Array.isArray(value.roles)) return value.roles.filter(Boolean).map(String);
+    if (typeof value.role === 'string') return [value.role];
+  }
+  return [];
+}
+
+function getRoleLabel(roles) {
+  const normalized = normalizeRoleList(roles).map(role => String(role).trim());
+
+  if (normalized.some(role => /docente|teacher/i.test(role))) return 'Docente';
+  if (normalized.some(role => /alumno|estudiante|student/i.test(role))) return 'Estudiante';
+  if (normalized.length > 0) return normalized[0];
+  return 'Usuario';
+}
+
 // -------------------------------------------------------------
 // ENDPOINT 2: Eventos, Logs y Alertas (CORREGIDO)
 // -------------------------------------------------------------
@@ -276,10 +295,110 @@ app.get('/api/dashboard/logs', async (req, res) => {
   }
 });
 
+app.get('/api/auth/session', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
+    if (!token) {
+      return res.status(401).json({
+        authenticated: false,
+        user: null,
+        roles: [],
+        roleLabel: 'Usuario'
+      });
+    }
+
+    const profileResponse = await fetch(`https://${process.env.AUTH0_DOMAIN}/userinfo`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!profileResponse.ok) {
+      throw new Error('No se pudo obtener el perfil del usuario desde Auth0');
+    }
+
+    const profile = await profileResponse.json();
+    const roles = normalizeRoleList(
+      profile.roles
+        ?? profile.role
+        ?? profile['https://nova-digital/roles']
+        ?? profile['https://nova-digital/role']
+        ?? profile.app_metadata?.role
+        ?? profile['app_metadata']?.role
+    );
+
+    res.json({
+      authenticated: true,
+      user: profile,
+      roles,
+      roleLabel: getRoleLabel(roles)
+    });
+  } catch (error) {
+    console.error('Error obteniendo la sesión de Auth0:', error);
+    res.status(500).json({
+      authenticated: false,
+      user: null,
+      roles: [],
+      roleLabel: 'Usuario',
+      error: error.message
+    });
+  }
+});
 
 // -------------------------------------------------------------
-// ENDPOINT 3: Metadata de Roles
+// ENDPOINT 3: Registro detallado de actividad
+// -------------------------------------------------------------
+app.get('/api/activity', async (req, res) => {
+  try {
+    const rawLogs = await getAuth0Logs({ per_page: 100, sort: 'date:-1' });
+
+    const activity = rawLogs.map((log, index) => {
+      const typeKey = String(log.type || '').toLowerCase();
+      const isSuccess = typeKey.startsWith('s');
+      const friendlyAction = AUTH0_ACTION_NAMES[log.type]
+        || AUTH0_ACTION_NAMES[typeKey]
+        || log.type_name
+        || log.type
+        || 'Evento de Seguridad';
+
+      return {
+        id: log._id || log.log_id || `${Date.now()}-${index}`,
+        user: log.user_name || log.user_id || 'Usuario Anónimo',
+        type: log.type || 'Evento',
+        action: friendlyAction,
+        status: isSuccess ? 'Permitido' : 'Denegado',
+        details: log.description || 'Sin detalle disponible',
+        ip: log.ip || 'N/A',
+        location: log.location_info?.country_code || 'N/A',
+        source: log.connection || 'Auth0',
+        date: log.date
+      };
+    });
+
+    const successful = activity.filter(item => item.status === 'Permitido').length;
+    const denied = activity.filter(item => item.status === 'Denegado').length;
+    const uniqueUsers = new Set(activity.map(item => item.user).filter(Boolean)).size;
+
+    res.json({
+      stats: {
+        total: activity.length,
+        successful,
+        denied,
+        uniqueUsers
+      },
+      activity
+    });
+  } catch (error) {
+    console.error('Error calculando registro de actividad:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// -------------------------------------------------------------
+// ENDPOINT 4: Metadata de Roles
 // -------------------------------------------------------------
 app.get('/api/roles', async (req, res) => {
   try {
@@ -305,7 +424,25 @@ app.get('/api/roles', async (req, res) => {
 app.get('/api/users', async (req, res) => {
   try {
     const users = await getAuth0Users();
-    res.json(users);
+    const usersWithRoles = await Promise.all(
+      users.map(async (user) => {
+        const userId = user.user_id || user.id;
+        const assignedRoles = userId ? await getAuth0UserRoles(userId) : [];
+        const roleNames = Array.isArray(assignedRoles)
+          ? assignedRoles
+              .map((role) => typeof role === 'string' ? role : role?.name)
+              .filter(Boolean)
+          : [];
+
+        return {
+          ...user,
+          roles: roleNames,
+          role: roleNames[0] || 'Sin rol'
+        };
+      })
+    );
+
+    res.json(usersWithRoles);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

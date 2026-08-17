@@ -33,22 +33,31 @@
       </div>
     </main>
 
-    <!-- 3. Usuario AUTENTICADO -> Layout Principal con Slot de Navegación -->
+    <!-- 3. Usuario AUTENTICADO: docente o estudiante -->
+    <MainLayout
+      v-else-if="isAuthenticated && isStudentOrTeacher"
+      is-welcome-mode
+      #default
+    >
+      <WelcomePage
+        :role-name="roleLabel"
+        :user-name="userDisplayName"
+      />
+    </MainLayout>
+
+    <!-- 4. Usuario AUTENTICADO -> Layout Principal con Slot de Navegación -->
     <MainLayout v-else-if="isAuthenticated" #default="{ currentTab }">
       <!-- Vista 1: Dashboard -->
       <DashboardView v-if="currentTab === 'dashboard'" />
 
-     <!-- Vista 2: Usuarios -->
-    <UsersManager v-else-if="currentTab === 'usuarios'" />
+      <!-- Vista 2: Usuarios -->
+      <UsersManager v-else-if="currentTab === 'usuarios'" />
 
-      <!-- Vista 3: Actividad (Marcador de posición / Futuro componente) -->
-      <div v-else-if="currentTab === 'actividad'" class="p-6 bg-white rounded-lg border border-[#c4c6cf]">
-        <h2 class="text-2xl font-bold text-[#000613] mb-2">Registro de Actividad</h2>
-        <p class="text-xs text-[#43474e]">Historial detallado de logs y auditorías del sistema.</p>
-      </div>
+      <!-- Vista 3: Actividad -->
+      <ActivityLogView v-else-if="currentTab === 'actividad'" />
     </MainLayout>
 
-    <!-- 4. Control de errores -->
+    <!-- 5. Control de errores -->
     <div v-if="error" class="error-state">
       <p>Ocurrió un error: {{ error.message }}</p>
       <button class="btn-login" @click="loginWithRedirect()">Reintentar</button>
@@ -57,16 +66,102 @@
 </template>
 
 <script setup lang="ts">
+import { computed, onMounted, ref, watch } from 'vue'
 import { useAuth0 } from '@auth0/auth0-vue'
 import MainLayout from './components/layout/MainLayout.vue'
 import DashboardView from './components/dashboard/DashboardView.vue'
-import UsersManager from './components/users/UsersManager.vue' // <--- IMPORTAR AQUÍ
+import UsersManager from './components/users/UsersManager.vue'
+import ActivityLogView from './components/dashboard/ActivityLogView.vue'
+import WelcomePage from './components/dashboard/welcome_page.vue'
+
 const {
   isLoading,
   isAuthenticated,
   error,
-  loginWithRedirect
+  loginWithRedirect,
+  user,
+  getAccessTokenSilently
 } = useAuth0()
+
+const sessionRoles = ref<string[]>([])
+const sessionRoleLabel = ref('Usuario')
+
+const loadSessionRole = async () => {
+  if (!isAuthenticated.value) {
+    sessionRoles.value = []
+    sessionRoleLabel.value = 'Usuario'
+    return
+  }
+
+  try {
+    const token = await getAccessTokenSilently()
+    const response = await fetch('http://localhost:3000/api/auth/session', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error('No se pudo obtener la sesión del usuario')
+    }
+
+    const data = await response.json()
+    sessionRoles.value = Array.isArray(data.roles) ? data.roles : []
+    sessionRoleLabel.value = data.roleLabel || 'Usuario'
+  } catch (err) {
+    console.error('Error cargando la sesión del usuario:', err)
+    sessionRoles.value = []
+    sessionRoleLabel.value = 'Usuario'
+  }
+}
+
+onMounted(() => {
+  if (isAuthenticated.value) {
+    loadSessionRole()
+  }
+})
+
+watch(isAuthenticated, (value) => {
+  if (value) {
+    loadSessionRole()
+  }
+}, { immediate: true })
+
+const rawRoles = computed(() => {
+  const rolesFromUser =
+    user.value?.roles ??
+    user.value?.role ??
+    user.value?.['https://novadigital.edu.sv/roles'] ??
+    user.value?.['https://novadigital.edu.sv/role'] ??
+    user.value?.['https://nova-digital/roles'] ??
+    user.value?.['https://nova-digital/role'] ??
+    user.value?.app_metadata?.role ??
+    user.value?.['app_metadata']?.role
+
+  const roles = sessionRoles.value.length > 0 ? sessionRoles.value : rolesFromUser
+
+  if (Array.isArray(roles)) return roles
+  if (typeof roles === 'string') return [roles]
+  return []
+})
+
+const roleLabel = computed(() => {
+  const normalized = rawRoles.value.map(role => String(role).trim())
+
+  if (normalized.some(role => /docente|teacher/i.test(role))) return 'Docente'
+  if (normalized.some(role => /alumno|estudiante|student/i.test(role))) return 'Estudiante'
+
+  return sessionRoleLabel.value || 'Usuario'
+})
+
+const isStudentOrTeacher = computed(() => {
+  const normalized = rawRoles.value.map(role => String(role).toLowerCase())
+  return normalized.some(role => /(docente|teacher|alumno|estudiante|student)/i.test(role))
+})
+
+const userDisplayName = computed(() => {
+  return user.value?.name || user.value?.given_name || user.value?.email || 'Usuario'
+})
 </script>
 
 <style scoped>

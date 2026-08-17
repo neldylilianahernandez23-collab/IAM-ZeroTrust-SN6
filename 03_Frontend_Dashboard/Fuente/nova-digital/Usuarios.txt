@@ -1,0 +1,27 @@
+
+    alerfin
+    troferit
+
+
+
+    
+git@github-ip05031:ip05031/Auth0.git
+
+
+danny@gmail.com
+Admin123456@
+Estudiante
+
+luis@gmail.com
+Admin123457@
+Docente
+
+lissetedezapata@gmail.com
+autoguardado
+Auditor
+
+ip05031@gmail.com
+Autoguardado
+administrador
+
+Admin123458@

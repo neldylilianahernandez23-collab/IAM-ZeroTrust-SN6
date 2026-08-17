@@ -1,14 +1,14 @@
 <template>
   <div
     v-if="isOpen"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-[#000613]/60 backdrop-blur-sm"
   >
-    <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl dark:bg-slate-800">
-      <div class="flex items-center justify-between border-b pb-3 dark:border-slate-700">
-        <h3 class="text-lg font-bold text-slate-800 dark:text-white">Crear Nuevo Usuario</h3>
+    <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl border border-[#c4c6cf]">
+      <div class="flex items-center justify-between border-b border-[#c4c6cf] pb-3">
+        <h3 class="text-lg font-bold text-[#000613]">Crear Nuevo Usuario</h3>
         <button
           @click="closeModal"
-          class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+          class="text-[#43474e] hover:text-[#000613] transition-colors"
         >
           ✕
         </button>
@@ -16,71 +16,61 @@
 
       <div
         v-if="error"
-        class="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400"
+        class="mt-4 rounded-md bg-[#ba1a1a]/10 p-3 text-sm text-[#ba1a1a]"
       >
         {{ error }}
       </div>
 
       <form @submit.prevent="handleSubmit" class="mt-4 space-y-4">
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >Correo Electrónico</label
-          >
+          <label class="block text-sm font-medium text-[#000613]">Correo Electrónico</label>
           <input
             v-model="formData.email"
             type="email"
             required
             placeholder="usuario@dominio.com"
-            class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+            class="mt-1 w-full rounded-lg border border-[#c4c6cf] bg-[#f8f9ff] p-2 text-sm text-[#000613] focus:border-[#2f486a] focus:outline-none"
           />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >Contraseña Temporal</label
-          >
+          <label class="block text-sm font-medium text-[#000613]">Contraseña Temporal</label>
           <input
             v-model="formData.password"
             type="password"
             required
             minlength="8"
             placeholder="••••••••"
-            class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+            class="mt-1 w-full rounded-lg border border-[#c4c6cf] bg-[#f8f9ff] p-2 text-sm text-[#000613] focus:border-[#2f486a] focus:outline-none"
           />
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300"
-              >Nombre</label
-            >
+            <label class="block text-sm font-medium text-[#000613]">Nombre</label>
             <input
               v-model="formData.given_name"
               type="text"
               placeholder="Juan"
-              class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+              class="mt-1 w-full rounded-lg border border-[#c4c6cf] bg-[#f8f9ff] p-2 text-sm text-[#000613] focus:border-[#2f486a] focus:outline-none"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300"
-              >Apellido</label
-            >
+            <label class="block text-sm font-medium text-[#000613]">Apellido</label>
             <input
               v-model="formData.family_name"
               type="text"
               placeholder="Pérez"
-              class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+              class="mt-1 w-full rounded-lg border border-[#c4c6cf] bg-[#f8f9ff] p-2 text-sm text-[#000613] focus:border-[#2f486a] focus:outline-none"
             />
           </div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 dark:text-slate-300"
-            >Rol Inicial</label
-          >
+          <label class="block text-sm font-medium text-[#000613]">Rol Inicial</label>
           <select
             v-model="formData.role"
-            class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm focus:border-indigo-500 focus:outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+            class="mt-1 w-full rounded-lg border border-[#c4c6cf] bg-[#f8f9ff] p-2 text-sm text-[#000613] focus:border-[#2f486a] focus:outline-none"
           >
             <template v-if="availableRoles.length > 0">
               <option v-for="r in availableRoles" :key="r.id || r.name" :value="r.name">
@@ -100,14 +90,14 @@
           <button
             type="button"
             @click="closeModal"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
+            class="rounded-lg border border-[#c4c6cf] px-4 py-2 text-sm text-[#43474e] hover:bg-[#eff4ff]"
           >
             Cancelar
           </button>
           <button
             type="submit"
             :disabled="loading"
-            class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            class="rounded-lg bg-[#000613] px-4 py-2 text-sm font-medium text-white hover:bg-[#2f486a] disabled:opacity-50 transition-colors"
           >
             {{ loading ? 'Guardando...' : 'Crear Usuario' }}
           </button>

@@ -1,24 +1,24 @@
 <template>
-  <div v-if="authLoading" class="p-6">
+  <div v-if="authLoading" class="p-6 text-sm font-medium text-[#43474e]">
     Verificando sesión con Auth0...
   </div>
 
-  <div v-else-if="!isAuthenticated" class="p-6 text-center text-red-600">
+  <div v-else-if="!isAuthenticated" class="p-6 text-center text-[#ba1a1a] font-medium">
     Debes iniciar sesión para acceder a la gestión de usuarios.
   </div>
 
-  <div v-else class="space-y-6 p-6">
+  <div v-else class="space-y-6 p-6 bg-[#f8f9ff] rounded-xl">
     <!-- Encabezado -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
       <div>
-        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Gestión de Usuarios</h1>
-        <p class="text-sm text-slate-500">
-          Administra las cuentas registradas y sus roles en Auth0
+        <h1 class="text-3xl font-bold text-[#000613]">Gestión de Usuarios</h1>
+        <p class="text-xs text-[#43474e] mt-1">
+          Administra las cuentas registradas y sus roles en Auth0.
         </p>
       </div>
       <button
         @click="isModalOpen = true"
-        class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-indigo-700"
+        class="rounded-lg bg-[#000613] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#2f486a]"
       >
         + Nuevo Usuario
       </button>

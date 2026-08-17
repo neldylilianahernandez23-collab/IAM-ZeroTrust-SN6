@@ -19,32 +19,45 @@
       </div>
 
       <nav class="flex-1 space-y-1">
-        <button 
-          @click="currentTab = 'dashboard'"
-          :class="currentTab === 'dashboard' ? 'bg-[#2f486a] text-white font-semibold' : 'text-[#afc8f0] hover:bg-[#2f486a]/50 hover:text-white'"
-          class="w-full text-left flex items-center gap-3 px-3 py-2 rounded cursor-pointer transition-transform active:scale-95"
-        >
-          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
-          <span class="text-sm">Dashboard</span>
-        </button>
+        <template v-if="isWelcomeMode">
+          <button 
+            @click="currentTab = 'welcome'"
+            :class="currentTab === 'welcome' ? 'bg-[#2f486a] text-white font-semibold' : 'text-[#afc8f0] hover:bg-[#2f486a]/50 hover:text-white'"
+            class="w-full text-left flex items-center gap-3 px-3 py-2 rounded cursor-pointer transition-transform active:scale-95"
+          >
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+            <span class="text-sm">Welcome</span>
+          </button>
+        </template>
 
-        <button 
-          @click="currentTab = 'usuarios'"
-          :class="currentTab === 'usuarios' ? 'bg-[#2f486a] text-white font-semibold' : 'text-[#afc8f0] hover:bg-[#2f486a]/50 hover:text-white'"
-          class="w-full text-left flex items-center gap-3 px-3 py-2 rounded cursor-pointer transition-transform active:scale-95"
-        >
-          <span class="material-symbols-outlined">fingerprint</span>
-          <span class="text-sm">Usuarios</span>
-        </button>
+        <template v-else>
+          <button 
+            @click="currentTab = 'dashboard'"
+            :class="currentTab === 'dashboard' ? 'bg-[#2f486a] text-white font-semibold' : 'text-[#afc8f0] hover:bg-[#2f486a]/50 hover:text-white'"
+            class="w-full text-left flex items-center gap-3 px-3 py-2 rounded cursor-pointer transition-transform active:scale-95"
+          >
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+            <span class="text-sm">Dashboard</span>
+          </button>
 
-        <button 
-          @click="currentTab = 'actividad'"
-          :class="currentTab === 'actividad' ? 'bg-[#2f486a] text-white font-semibold' : 'text-[#afc8f0] hover:bg-[#2f486a]/50 hover:text-white'"
-          class="w-full text-left flex items-center gap-3 px-3 py-2 rounded cursor-pointer transition-transform active:scale-95"
-        >
-          <span class="material-symbols-outlined">history</span>
-          <span class="text-sm">Actividad</span>
-        </button>
+          <button 
+            @click="currentTab = 'usuarios'"
+            :class="currentTab === 'usuarios' ? 'bg-[#2f486a] text-white font-semibold' : 'text-[#afc8f0] hover:bg-[#2f486a]/50 hover:text-white'"
+            class="w-full text-left flex items-center gap-3 px-3 py-2 rounded cursor-pointer transition-transform active:scale-95"
+          >
+            <span class="material-symbols-outlined">fingerprint</span>
+            <span class="text-sm">Usuarios</span>
+          </button>
+
+          <button 
+            @click="currentTab = 'actividad'"
+            :class="currentTab === 'actividad' ? 'bg-[#2f486a] text-white font-semibold' : 'text-[#afc8f0] hover:bg-[#2f486a]/50 hover:text-white'"
+            class="w-full text-left flex items-center gap-3 px-3 py-2 rounded cursor-pointer transition-transform active:scale-95"
+          >
+            <span class="material-symbols-outlined">history</span>
+            <span class="text-sm">Actividad</span>
+          </button>
+        </template>
       </nav>
 
       <div class="pt-6 border-t border-white/10 space-y-1">
@@ -99,17 +112,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useAuth0 } from '@auth0/auth0-vue'
 
-defineProps<{
+const props = withDefaults(defineProps<{
   hasNotifications?: boolean
-}>()
+  isWelcomeMode?: boolean
+}>(), {
+  hasNotifications: false,
+  isWelcomeMode: false
+})
 
 const { user, logout } = useAuth0()
-const currentTab = ref('dashboard')
+const currentTab = ref(props.isWelcomeMode ? 'welcome' : 'dashboard')
 
 const handleLogout = () => {
   logout({ logoutParams: { returnTo: window.location.origin } })
 }
+
+watch(() => props.isWelcomeMode, (value) => {
+  currentTab.value = value ? 'welcome' : 'dashboard'
+})
 </script>
